@@ -9,3 +9,4 @@ Timestamps are real UTC wall-clock times from `date -u` in the build sandbox, ap
 - 2026-10-20T19:46:18Z  Commit 2: money.py + core.py (no fees/interest yet). Auth state is derived by folding the decision log; nothing mutated.
 - 2026-10-20T19:46:39Z  Commit 3: fees work (days 2,4,5). Naive interest (round each day, sum) gives 0.93 but exact is 0.918 -> 0.92. Test is RED on purpose; committed to keep the abandoned approach in history.
 - 2026-10-20T19:46:45Z  Commit 4: replaced naive rounding with cumulative rounding + hard invariant check in capitalize_interest. Interest test green. ACC-001 daily = 0.10,0.09,0.25,0.17,0.15,0.16 = 0.92.
+- 2026-10-20T19:47:12Z  Commit 5: replay.py. Fixed tuple-unpack crash in close_day; moved re-sequence notice out of the errors list (it is not an error). Output matches hand numbers: fees D2/D4/D5, Auth-B DECLINED, interest 0.92.
