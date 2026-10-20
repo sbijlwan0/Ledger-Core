@@ -205,11 +205,17 @@ class Ledger:
         return new
 
     def accruals(self, account, window):
-        rows = []
+        """Daily accruals by cumulative rounding: each day's amount is
+        round(cumulative exact accrual) - (amount already assigned). The sub-minor-unit
+        residual is carried forward, never discarded, so sum(daily) == round(exact total)."""
+        rows, cum, paid = [], 0, 0
         for d in range(1, window + 1):
-            bal = self.balance(account, d)
-            numer = max(bal, 0) * RATE_NUM
-            rows.append(Accrual(account, d, bal, numer, money.div_round_half_up(numer, RATE_DEN)))
+            bal = self.balance(account, d)          # restated, value-dated
+            numer = max(bal, 0) * RATE_NUM          # positive balances only
+            cum += numer
+            target = money.div_round_half_up(cum, RATE_DEN)
+            rows.append(Accrual(account, d, bal, numer, target - paid))
+            paid = target
         return rows
 
     def capitalize_interest(self, day, window):
@@ -221,6 +227,9 @@ class Ledger:
             out[acct] = rows
         for acct, rows in out.items():
             total = sum(r.amount for r in rows)
+            exact = money.div_round_half_up(sum(r.numer for r in rows), RATE_DEN)
+            if total != exact:
+                raise LedgerError(f"accruals {total} do not sum to capitalized total {exact}")
             if total > 0:
                 self._post(f"INT-{acct}", day, window, acct, "INTEREST", total)
         self._capitalized = True
