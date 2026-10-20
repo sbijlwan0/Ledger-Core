@@ -86,7 +86,7 @@ class CriteriaTests(unittest.TestCase):
         self.assertEqual(led.balance(A1, 4), 41500)                         # 415.00 ...
         self.assertNotEqual(led.balance(A1, 4), pre_e7.balance(A1, 4))      # ... not the pre-E7 465.00
         self.assertEqual(pre_e7.balance(A1, 4), 46500)
-        self.assertEqual(led.balance(A1, 5, booked_by=6) - 92, 39000)       # 390.00 + 0.92 interest vs 465.00
+        self.assertEqual(led.balance(A1, 5), 39000)                         # 390.00 (interest is value-dated D6)
 
     def test_c7_REFUSED_instalments_are_3333_3333_3334(self):
         led, _ = run(EVENTS)
