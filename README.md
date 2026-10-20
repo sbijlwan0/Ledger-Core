@@ -7,8 +7,8 @@ Python 3.9+, standard library only. No web layer, persistence, UI or database.
 ```
 python -m ledger.replay                  # replay E1..E10, print the per-day report
 python -m ledger.replay --strict-order   # replay in exactly the listed order (E10 arrives late)
-python -m unittest tests.test_ledger tests.test_interest   # 20 tests, all green
-python -m unittest discover -s tests -t .                  # full suite: 1 DESIGNED failure (see below)
+python -m unittest tests.test_ledger tests.test_interest   # 18 tests, all green
+python -m unittest discover -s tests -t .                  # full suite: 19 pass + 1 DESIGNED failure (see below)
 ```
 
 **The full suite is supposed to exit non-zero.** `tests/test_known_design_failure.py` is a
