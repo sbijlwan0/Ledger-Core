@@ -6,6 +6,15 @@ FEE_CCY, FEE_MINOR = "AED", 2500          # AED 25.00
 RATE_NUM, RATE_DEN = 4, 10000             # 0.04 % per day, simple (no compounding)
 
 
+@dataclass(frozen=True)
+class Accrual:
+    account: str
+    day: int
+    balance: int      # restated closing ledger balance used
+    numer: int        # balance * RATE_NUM, i.e. accrual in units of 1/RATE_DEN minor unit
+    amount: int       # rounded accrual, minor units
+
+
 class LedgerError(Exception):
     pass
 
@@ -177,3 +186,42 @@ class Ledger:
         for t in targets:
             self._post(f"{eid}:{t.event_id}", booked, value_day, account, "REVERSAL", -t.amount, t.event_id)
         return self._decide(eid, booked, "REVERSAL", account, "ACCEPTED", "", ref_event, sum(-t.amount for t in targets), value_day)
+
+    # ---- end-of-day processing ----
+    def assess_fees(self, day):
+        """Assess overdraft fees at the close of booking day `day`, for every value day <= day
+        that has no fee yet and whose closing ledger balance is negative. Days ascend so a
+        fee on an earlier day counts in later days' balances. The test balance excludes the
+        fee being decided (it does not exist yet), avoiding circularity."""
+        new = []
+        for acct, ccy in self._ccy.items():
+            for d in range(1, day + 1):
+                if any(e.kind == "FEE" and e.account == acct and e.value_day == d for e in self._entries):
+                    continue
+                if self.balance(acct, d) < 0:
+                    if ccy != FEE_CCY:
+                        raise LedgerError(f"overdraft fee is {FEE_CCY} but {acct} is {ccy}; no FX rate specified")
+                    new.append(self._post(f"FEE-{acct}-D{d}", day, d, acct, "FEE", -FEE_MINOR))
+        return new
+
+    def accruals(self, account, window):
+        rows = []
+        for d in range(1, window + 1):
+            bal = self.balance(account, d)
+            numer = max(bal, 0) * RATE_NUM
+            rows.append(Accrual(account, d, bal, numer, money.div_round_half_up(numer, RATE_DEN)))
+        return rows
+
+    def capitalize_interest(self, day, window):
+        if self._capitalized:
+            raise LedgerError("interest already capitalized")
+        out = {}
+        for acct in self._ccy:
+            rows = self.accruals(acct, window)
+            out[acct] = rows
+        for acct, rows in out.items():
+            total = sum(r.amount for r in rows)
+            if total > 0:
+                self._post(f"INT-{acct}", day, window, acct, "INTEREST", total)
+        self._capitalized = True
+        return out
