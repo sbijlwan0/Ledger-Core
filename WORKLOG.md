@@ -14,3 +14,4 @@ Timestamps are real UTC wall-clock times from `date -u` in the build sandbox, ap
 - 2026-10-20T19:47:45Z  Commit 7: commit 6 was NOT green - I committed without reading the exit status and the message said green. Assertion was wrong (subtracted interest that is value-dated D6). Fixed forward in a new commit; history not rewritten.
 - 2026-10-20T19:47:56Z  Commit 8: added the one deliberately failing test (approved Auth-A is uncovered at D2 after E7 lands: -595.00). It is red on purpose; suite is now 19 pass + 1 designed failure.
 - 2026-10-20T19:48:07Z  Commit 9: README.
+- 2026-10-20T19:48:22Z  Commit 10: NUMBERS.md; README said 20 green, it is 18 green + 19/20 overall. Fixed.
