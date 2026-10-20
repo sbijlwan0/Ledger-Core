@@ -15,3 +15,5 @@ Timestamps are real UTC wall-clock times from `date -u` in the build sandbox, ap
 - 2026-10-20T19:47:56Z  Commit 8: added the one deliberately failing test (approved Auth-A is uncovered at D2 after E7 lands: -595.00). It is red on purpose; suite is now 19 pass + 1 designed failure.
 - 2026-10-20T19:48:07Z  Commit 9: README.
 - 2026-10-20T19:48:22Z  Commit 10: NUMBERS.md; README said 20 green, it is 18 green + 19/20 overall. Fixed.
+- 2026-10-20T19:48:54Z  Commit 11: AMBIGUITIES.md (26 items) and REJECTED.md (4 refused, 4 accepted with caveats, 3 real abandoned approaches).
+- 2026-10-20T19:49:01Z  Final verification: replay exits 0; full suite 19 pass + 1 designed failure; AMBIGUITIES #4 sentence tightened (fee > AED 30.00 would trigger D3).
